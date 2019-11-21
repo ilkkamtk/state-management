@@ -49,7 +49,7 @@ app.post('/login', (req, res) => {
     req.session.logged = true;
     res.redirect('/secret');
   } else {
-    req.session.logged = true;
+    req.session.logged = false;
     res.redirect('/form');
   }
 });
