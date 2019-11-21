@@ -58,11 +58,11 @@ passport.use(new Strategy(
       // if username and password match user.email and user.password in users
       const user = getUserLogin(username, password);
       console.log(user);
-      if (user === undefined) {
+      if (user === undefined)
         return done(null, false);
-      } else {
-        return done(null, user.user_id);
-      }
+
+      return done(null, user.user_id);
+
     },
 ));
 
