@@ -1,7 +1,7 @@
-'use strict';
 const passport = require('passport');
 const Strategy = require('passport-local').Strategy;
 
+// fake database: ****************
 const users = [
   {
     user_id: 1,
@@ -16,9 +16,10 @@ const users = [
     password: 'barfoo',
   },
 ];
+// *******************
 
-const getUserById = (id) => {
-  console.log('id', id);
+// fake database functions *********
+const getUser = (id) => {
   const user = users.filter((usr) => {
     if (usr.user_id === id) {
       return usr;
@@ -27,43 +28,51 @@ const getUserById = (id) => {
   return user[0];
 };
 
-const getUserLogin = (email, pass) => {
+const getUserLogin = (email) => {
   const user = users.filter((usr) => {
-    console.log(email, pass);
-    if (usr.email === email && usr.password === pass) {
+    if (usr.email === email) {
       return usr;
     }
   });
   return user[0];
 };
+// *****************
 
 // serialize: store user id in session
 passport.serializeUser((id, done) => {
-  // serialize user id by adding it to 'done()' callback
   console.log('serialize', id);
+  // serialize user id by adding it to 'done()' callback
   done(null, id);
 });
 
 // deserialize: get user id from session and get all user data
 passport.deserializeUser(async (id, done) => {
-  // get user data by id from users
-  const user = getUserById(id);
+  // get user data by id from getUser
+  const user = getUser(id);
+  delete user.password;
   console.log('deserialize', user);
-// deserialize user by adding it to 'done()' callback
+  // deserialize user by adding it to 'done()' callback
   done(null, user);
 });
 
 passport.use(new Strategy(
-    async (username, password, done) => {
-      // if username and password match user.email and user.password in users
-      const user = getUserLogin(username, password);
-      console.log(user);
-      if (user === undefined)
+    (username, password, done) => {
+      // get user by username from getUserLogin
+      const user = getUserLogin(username);
+      // console.log(username, password);
+      // console.log('user', user);
+      // if user is undefined
+      if(user === undefined) {
         return done(null, false);
+      }
 
+      // if passwords dont match
+      if(user.password!== password) {
+        return done(null, false);
+      }
+      // if all is ok
       return done(null, user.user_id);
-
-    },
+    }
 ));
 
 module.exports = passport;
